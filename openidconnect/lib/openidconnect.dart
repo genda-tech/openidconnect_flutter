@@ -83,8 +83,6 @@ class OpenIdConnect {
     required InteractiveAuthorizationRequest request,
   }) async {
     late String? responseUrl;
-    final bool useFullScreen =
-        request.additionalParameters?['useFullScreen'] == 'true';
 
     final authEndpoint = Uri.parse(request.configuration.authorizationEndpoint);
     final uri = authEndpoint.replace(
@@ -103,9 +101,8 @@ class OpenIdConnect {
         redirectUrl: request.redirectUrl,
         popupHeight: request.popupHeight,
         popupWidth: request.popupWidth,
-        dialogPadding: request.dialogPadding,
         iconsColor: request.iconsColor,
-        useFullScreen: useFullScreen,
+        useFullScreen: request.useFullScreen,
       );
     } else if (kIsWeb) {
       final storage = EncryptedSharedPreferencesAsync.getInstance();

@@ -9,7 +9,6 @@ class OpenIdConnectAndroidiOS {
     required int popupWidth,
     required int popupHeight,
     required bool useFullScreen,
-    required EdgeInsets dialogPadding,
     required Color iconsColor,
   }) async {
     final controller = WebViewController()
