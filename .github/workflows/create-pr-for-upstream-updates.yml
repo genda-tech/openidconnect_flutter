@@ -1,0 +1,19 @@
+# フォーク元リポジトリの変更をフォーク先リポジトリに同期する PR を作成する GitHub Actions ワークフロー
+name: Sync Fork
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # 毎週月曜日 3:00am
+  workflow_dispatch:    # 手作業での実行も可
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: tgymnich/fork-sync@v2
+        with:
+          head: main # form 元リポジトリのブランチ
+          base: main # fork 先リポジトリ (== ワークフローが動作するリポジトリ) の PR マージ対象ブランチ
+          auto_approve: false  # 自動 approve しない
+          auto_merge: false    # 自動 merge しない
+
