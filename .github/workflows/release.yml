@@ -1,0 +1,51 @@
+name: Release new version
+on:
+  workflow_dispatch:
+    inputs:
+      bump-level:
+        type: choice
+        options: [patch, minor, major]
+        required: true
+        description: Bump to patch or minor or major
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get Flutter version
+        id: get-flutter-version
+        run: echo "flutter_version=$(bash .github/scripts/get_flutter_version.sh)" >> "${GITHUB_OUTPUT}"
+      - name: Set up flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ steps.get-flutter-version.outputs.flutter_version }}
+          cache: true
+      - uses: ./.github/actions/git-setup
+      - name: Bump version and create PR
+        env:
+          BUMP_LEVEL: ${{ inputs.bump-level }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBSPEC_YAML: pubspec.yaml
+          EXAMPLE_PUBSPEC_LOCK: example/pubspec.lock
+        run: |
+          NEW_VERSION="$(.github/scripts/bump.sh "${BUMP_LEVEL}")"
+          BRANCH_NAME="bump-version-${NEW_VERSION}"
+          git switch -c "${BRANCH_NAME}"
+          sed -i -E "s/^version:.*/version: ${NEW_VERSION}/" "${PUBSPEC_YAML}"
+          flutter pub get
+          git commit -m "[GitHub Action] Bump version to ${NEW_VERSION}" "${PUBSPEC_YAML}" "${EXAMPLE_PUBSPEC_LOCK}"
+          git push origin "${BRANCH_NAME}"
+          gh pr create --title "Bump version to ${NEW_VERSION}" --body "Automated version bump" --base main --head "${BRANCH_NAME}"
+      - name: Create tag and release
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          git tag "${NEW_VERSION}" -m "Version ${NEW_VERSION}"
+          git push origin "${NEW_VERSION}"
+          gh release create "${NEW_VERSION}" --title "${NEW_VERSION}" --generate-notes
