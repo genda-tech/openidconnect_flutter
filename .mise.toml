@@ -1,0 +1,4 @@
+# mise で flutter のバージョンをチームで統一するための設定ファイル
+# https://mise.jdx.dev/configuration.html#mise-toml
+[tools]
+flutter = "3.27.3-stable"

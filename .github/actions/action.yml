@@ -1,0 +1,27 @@
+name: "Setup Git Configuration"
+description: "Configures Git with standard settings for GitHub Actions"
+
+inputs:
+  user-name:
+    description: "Git user name"
+    required: false
+    default: ${{ github.triggering_actor }}
+  user-email:
+    description: "Git user email"
+    required: false
+    default: ${{ github.triggering_actor }}@users.noreply.github.com
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Git
+      shell: bash
+      run: |
+        git config --global user.name "${{ inputs.user-name }}"
+        git config --global user.email "${{ inputs.user-email }}"
+
+        git config --global committer.name "github-actions[bot]"
+        git config --global committer.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        echo "Git configuration:"
+        git config --list
