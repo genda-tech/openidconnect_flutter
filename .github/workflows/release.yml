@@ -34,7 +34,7 @@ jobs:
           BUMP_LEVEL: ${{ inputs.bump-level }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NEW_VERSION="$(.github/scripts/bump.sh "${BUMP_LEVEL}")"
+          NEW_VERSION=$(.github/scripts/bump.sh "${BUMP_LEVEL}" "${PUBSPEC_YAML}")
           BRANCH_NAME="bump-version-${NEW_VERSION}"
           git switch -c "${BRANCH_NAME}"
           sed -i -E "s/^version:.*/version: ${NEW_VERSION}/" "${PUBSPEC_YAML}"
